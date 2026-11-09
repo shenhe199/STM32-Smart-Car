@@ -1,0 +1,28 @@
+--cpu Cortex-M3
+"02_hal_motor\startup_stm32f103xb.o"
+"02_hal_motor\mpu6050.o"
+"02_hal_motor\mpu6050_i2c.o"
+"02_hal_motor\oled.o"
+"02_hal_motor\motor.o"
+"02_hal_motor\main.o"
+"02_hal_motor\stm32f1xx_it.o"
+"02_hal_motor\stm32f1xx_hal_msp.o"
+"02_hal_motor\stm32f1xx_hal_gpio_ex.o"
+"02_hal_motor\stm32f1xx_hal_tim.o"
+"02_hal_motor\stm32f1xx_hal_tim_ex.o"
+"02_hal_motor\stm32f1xx_hal.o"
+"02_hal_motor\stm32f1xx_hal_rcc.o"
+"02_hal_motor\stm32f1xx_hal_rcc_ex.o"
+"02_hal_motor\stm32f1xx_hal_gpio.o"
+"02_hal_motor\stm32f1xx_hal_dma.o"
+"02_hal_motor\stm32f1xx_hal_cortex.o"
+"02_hal_motor\stm32f1xx_hal_pwr.o"
+"02_hal_motor\stm32f1xx_hal_flash.o"
+"02_hal_motor\stm32f1xx_hal_flash_ex.o"
+"02_hal_motor\stm32f1xx_hal_exti.o"
+"02_hal_motor\stm32f1xx_hal_uart.o"
+"02_hal_motor\system_stm32f1xx.o"
+--library_type=microlib --strict --scatter "02_HAL_Motor\02_HAL_Motor.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "02_HAL_Motor.map" -o 02_HAL_Motor\02_HAL_Motor.axf
