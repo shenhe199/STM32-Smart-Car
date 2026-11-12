@@ -14,47 +14,52 @@ volatile int16_t ax = 0, ay = 0, az = 0;
 volatile int16_t gx = 0, gy = 0, gz = 0;
 volatile int16_t temp_raw = 0;
 
-/* 返回 0=成功；1=地址NACK；2=寄存器NACK；3=数据NACK */
+//向 MPU6050 写入一个字节
 uint8_t MPU6050_Write_Reg(uint8_t reg, uint8_t data)
 {
     uint8_t ret = 0;
     IIC_Start();
-    if (IIC_Send_Byte(MPU6050_ADDR_W)) ret = 1;
-    else if (IIC_Send_Byte(reg))       ret = 2;
-    else if (IIC_Send_Byte(data))      ret = 3;
+    if (IIC_Send_Byte(MPU6050_ADDR_W)) ret = 1;//发送器件地址
+    else if (IIC_Send_Byte(reg))       ret = 2;//发送寄存器地址
+    else if (IIC_Send_Byte(data))      ret = 3;//发送数据
     IIC_Stop();
-    return ret;
+    return ret;/* 返回 0=成功；1=地址NACK；2=寄存器NACK；3=数据NACK */
 }
 
+//从 MPU6050 读取一个字节
 uint8_t MPU6050_Read_Reg(uint8_t reg)
 {
     uint8_t data;
+
     IIC_Start();
-    IIC_Send_Byte(MPU6050_ADDR_W);
-    IIC_Send_Byte(reg);
-    IIC_Start();                        /* Restart */
-    IIC_Send_Byte(MPU6050_ADDR_R);
-    data = IIC_Read_Byte(0);            /* 单字节：必须 NACK */
+    IIC_Send_Byte(MPU6050_ADDR_W);//发送器件地址
+    IIC_Send_Byte(reg);//发送寄存器地址
+
+    IIC_Start();/* Restart */
+    IIC_Send_Byte(MPU6050_ADDR_R);//改变读写方向
+    data = IIC_Read_Byte(0);//接收MPU6050发来的1个字节数据
     IIC_Stop();
+
     return data;
 }
 
+// 初始化 MPU6050
 uint8_t MPU6050_Init(void)
 {
-    HAL_Delay(100);                                 /* 上电稳定 */
+    HAL_Delay(100);// 等待 MPU6050 上电稳定
 
-    if (MPU6050_Read_Reg(REG_WHO_AM_I) != 0x68)     /* 探测 */
+    if (MPU6050_Read_Reg(REG_WHO_AM_I) != 0x68)//探测
         return 1;
 
-    if (MPU6050_Write_Reg(REG_PWR_MGMT_1, 0x01))    /* 唤醒 + X轴陀螺PLL */
+    if (MPU6050_Write_Reg(REG_PWR_MGMT_1, 0x01))//唤醒 + X轴陀螺PLL
         return 2;
-    HAL_Delay(50);
+    HAL_Delay(50);// 等待唤醒稳定
 
-    MPU6050_Write_Reg(REG_SMPLRT_DIV,   0x09);      /* 1kHz/10 = 100Hz */
-    MPU6050_Write_Reg(REG_CONFIG,       0x03);      /* DLPF 44Hz/42Hz */
-    MPU6050_Write_Reg(REG_GYRO_CONFIG,  0x18);      /* ±2000°/s */
-    MPU6050_Write_Reg(REG_ACCEL_CONFIG, 0x00);      /* ±2g  */
-    HAL_Delay(10);
+    MPU6050_Write_Reg(REG_SMPLRT_DIV,   0x09);// 采样率 1kHz/10 = 100Hz
+    MPU6050_Write_Reg(REG_CONFIG,       0x03);// DLPF 3，陀螺 44Hz
+    MPU6050_Write_Reg(REG_GYRO_CONFIG,  0x18);// ±2000°/s
+    MPU6050_Write_Reg(REG_ACCEL_CONFIG, 0x00);// ±2g
+    HAL_Delay(10);// 等待配置稳定
     return 0;
 }
 
@@ -63,10 +68,13 @@ void MPU6050_Read_All(void)
     uint8_t buf[14];
 
     IIC_Start();
-    if (IIC_Send_Byte(MPU6050_ADDR_W))              { IIC_Stop(); return; }
-    if (IIC_Send_Byte(REG_ACCEL_XOUT_H))            { IIC_Stop(); return; }
-    IIC_Start();
-    if (IIC_Send_Byte(MPU6050_ADDR_R))              { IIC_Stop(); return; }
+    if (IIC_Send_Byte(MPU6050_ADDR_W))//发送器件地址
+        {IIC_Stop(); return; }//发送器件地址失败
+    if (IIC_Send_Byte(REG_ACCEL_XOUT_H))//发送寄存器地址
+        { IIC_Stop(); return; }//发送寄存器地址失败
+    IIC_Start();/* Restart */
+    if (IIC_Send_Byte(MPU6050_ADDR_R))//改变读写方向
+        { IIC_Stop(); return; }//改变读写方向失败
 
     /* 前 13 字节发 ACK(1)，最后 1 字节发 NACK(0) */
     for (int i = 0; i < 14; i++)
@@ -83,11 +91,13 @@ void MPU6050_Read_All(void)
     gz = (int16_t)(((uint16_t)buf[12] << 8) | buf[13]);
 }
 
+/* 保留旧接口 */
 void MPU6050_Read_Accel(void)
 {
-    MPU6050_Read_All();     /* 保留旧接口，内部走连续读 */
+    MPU6050_Read_All();
 }
 
+//温度传感器物理量转换，返回摄氏度
 float MPU6050_GetTempC(void)
 {
     return temp_raw / 340.0f + 36.53f;
