@@ -6,7 +6,7 @@ extern void IIC_Start(void);
 extern void IIC_Stop(void);
 extern uint8_t IIC_Send_Byte(uint8_t byte);
 
-#define OLED_ADDR_W 0x78 // OLED 的写地址 (0x3C << 1)
+#define OLED_ADDR_W 0x78 // OLED 写地址
 
 // 极简字库 (包含空格、数字、大写字母、常用符号)
 const uint8_t F6x8[][6] = {
@@ -76,101 +76,105 @@ const uint8_t F6x8[][6] = {
     {0x40,0x40,0x40,0x40,0x40,0x00}, // _
 };
 
+// OLED 写命令函数
 void OLED_WriteCmd(uint8_t cmd) {
     IIC_Start();
-    IIC_Send_Byte(OLED_ADDR_W);
-    IIC_Send_Byte(0x00);
-    IIC_Send_Byte(cmd);
+    IIC_Send_Byte(OLED_ADDR_W);// 发送写地址
+    IIC_Send_Byte(0x00);// 发送命令标志
+    IIC_Send_Byte(cmd);// 发送命令
     IIC_Stop();
 }
 
+// OLED 写数据函数
 void OLED_WriteData(uint8_t data) {
     IIC_Start();
-    IIC_Send_Byte(OLED_ADDR_W);
-    IIC_Send_Byte(0x40);
-    IIC_Send_Byte(data);
+    IIC_Send_Byte(OLED_ADDR_W);// 发送写地址
+    IIC_Send_Byte(0x40);// 发送数据标志
+    IIC_Send_Byte(data);// 发送数据
     IIC_Stop();
 }
 
+// OLED 设置光标位置函数
 void OLED_SetPos(uint8_t x, uint8_t y) {
-    OLED_WriteCmd(0xB0 + y);
-    OLED_WriteCmd(((x & 0xF0) >> 4) | 0x10);
-    OLED_WriteCmd((x & 0x0F) | 0x01); // 有的屏是 | 0x00，这里为了对齐字库偏移
+    OLED_WriteCmd(0xB0 + y);// 设置页地址
+    OLED_WriteCmd(((x & 0xF0) >> 4) | 0x10);// 设置列地址高4位
+    OLED_WriteCmd((x & 0x0F) | 0x01); // 设置列地址低4位【对齐字库偏移】
 }
 
+// OLED 初始化函数
 void OLED_Init(void) {
-    HAL_Delay(100);
-    OLED_WriteCmd(0xAE); // 关显示
-    OLED_WriteCmd(0x20); OLED_WriteCmd(0x00); // 水平寻址
-    OLED_WriteCmd(0xB0); // 页0
-    OLED_WriteCmd(0xC8); // 扫描方向
-    OLED_WriteCmd(0x00); OLED_WriteCmd(0x10); // 列地址
-    OLED_WriteCmd(0x40); // 起始行
-    OLED_WriteCmd(0x81); OLED_WriteCmd(0x7F); // 对比度
-    OLED_WriteCmd(0xA1); // 段重映射
-    OLED_WriteCmd(0xA6); // 正常显示
-    OLED_WriteCmd(0xA8); OLED_WriteCmd(0x3F); // 多路复用
-    OLED_WriteCmd(0xA4); // 跟随RAM
-    OLED_WriteCmd(0xD3); OLED_WriteCmd(0x00); // 偏移
-    OLED_WriteCmd(0xD5); OLED_WriteCmd(0x80); // 时钟
-    OLED_WriteCmd(0xD9); OLED_WriteCmd(0xF1); // 预充电
-    OLED_WriteCmd(0xDA); OLED_WriteCmd(0x12); // COM引脚
-    OLED_WriteCmd(0xDB); OLED_WriteCmd(0x40); // VCOMH
-    OLED_WriteCmd(0x8D); OLED_WriteCmd(0x14); // 电荷泵
-    OLED_WriteCmd(0xAF); // 开显示
-    OLED_Clear();
+    HAL_Delay(100); // 等待 OLED 上电稳定
+    OLED_WriteCmd(0xAE); // 关闭显示
+    OLED_WriteCmd(0x20); OLED_WriteCmd(0x00); // 设置内存地址模式为水平模式
+    OLED_WriteCmd(0xB0); // 设置页起始地址（0）
+    OLED_WriteCmd(0xC8); // 设置 COM 扫描方向
+    OLED_WriteCmd(0x00); OLED_WriteCmd(0x10); // 设置列起始地址（0）
+    OLED_WriteCmd(0x40); // 设置起始行地址（0）
+    OLED_WriteCmd(0x81); OLED_WriteCmd(0x7F); // 设置对比度
+    OLED_WriteCmd(0xA1); // 设置段重映射
+    OLED_WriteCmd(0xA6); // 设置正常显示
+    OLED_WriteCmd(0xA8); OLED_WriteCmd(0x3F); // 设置多路复用比率
+    OLED_WriteCmd(0xA4); // 设置显示跟随内部 RAM
+    OLED_WriteCmd(0xD3); OLED_WriteCmd(0x00); // 设置偏移
+    OLED_WriteCmd(0xD5); OLED_WriteCmd(0x80); // 设置时钟和分频
+    OLED_WriteCmd(0xD9); OLED_WriteCmd(0xF1); // 设置预充电周期
+    OLED_WriteCmd(0xDA); OLED_WriteCmd(0x12); // 设置 COM 引脚硬件配置
+    OLED_WriteCmd(0xDB); OLED_WriteCmd(0x40); // 设置 VCOMH
+    OLED_WriteCmd(0x8D); OLED_WriteCmd(0x14); // 设置电荷泵
+    OLED_WriteCmd(0xAF); // 打开显示
+    OLED_Clear();// 清屏
 }
 
+// 清屏函数
 void OLED_Clear(void) {
-    for(uint8_t y = 0; y < 8; y++) {
-        OLED_SetPos(0, y);
-        for(uint8_t x = 0; x < 128; x++) {
-            OLED_WriteData(0x00);
+    for(uint8_t y = 0; y < 8; y++) {// OLED 有 8 页
+        OLED_SetPos(0, y);// 设置光标到每一页的起始位置
+        for(uint8_t x = 0; x < 128; x++) {// OLED 每页有 128 列
+            OLED_WriteData(0x00);// 写入 0 清除像素
         }
     }
 }
 
+// 显示字符函数
 void OLED_ShowChar(uint8_t x, uint8_t y, char chr) {
-    uint8_t c = chr - ' ';
-    if(c > 94) c = 0; // 越界保护
-    OLED_SetPos(x, y);
-    for(uint8_t i = 0; i < 6; i++) {
-        OLED_WriteData(F6x8[c][i]);
+    uint8_t c = chr - ' ';// 字符转换为字库索引
+    if(c > 94) c = 0; // 越界保护，防止访问字库数组越界
+    OLED_SetPos(x, y);// 设置光标位置
+    for(uint8_t i = 0; i < 6; i++) {// 字库每个字符占 6 个字节
+        OLED_WriteData(F6x8[c][i]);// 写入字库数据
     }
 }
 
+// 显示字符串函数
 void OLED_ShowString(uint8_t x, uint8_t y, char *str) {
-    while (*str != '\0') {
-        OLED_ShowChar(x, y, *str);
-        x += 6;
-        if(x > 122) { x = 0; y++; }
-        str++;
+    while (*str != '\0') {// 遍历字符串直到遇到结束符
+        OLED_ShowChar(x, y, *str);// 显示当前字符
+        x += 6;// 每个字符宽度为 6 像素，移动光标到下一个字符位置
+        if(x > 122) { x = 0; y++;// 超过屏幕宽度，换行
+        if (y > 7) return;// 超过屏幕范围，直接返回
+        }
+        str++;// 移动到下一个字符
     }
 }
 
+// 显示数字函数
 void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len) {
-    uint8_t t, temp;
-    for(t = 0; t < len; t++) {
-        temp = (num / (uint32_t)(1)) % 10; // 简化逻辑，实际可用sprintf
-        // 这里的数字提取为了不引入math.h，用循环
-    }
-    // 为了精简且不出Bug，数字显示我直接用简单的循环
-    char buf[12];
+    char buf[12];// 用于存储数字字符串
     for(int i=0; i<len; i++) {
-        buf[len-1-i] = (num % 10) + '0';
-        num /= 10;
+        buf[len-1-i] = (num % 10) + '0';// 将数字转换为字符
+        num /= 10;// 去掉已经处理的最低位数字
     }
-    buf[len] = '\0';
-    OLED_ShowString(x, y, buf);
+    buf[len] = '\0';// 添加字符串结束符
+    OLED_ShowString(x, y, buf);// 显示数字字符串    
 }
 
+// 显示浮点数函数
 void OLED_ShowFloat(uint8_t x, uint8_t y, float num) {
-    char buf[16];
-    int int_part = (int)num;
-    int frac_part = (int)((num - int_part) * 10.0f);
-    if(frac_part < 0) frac_part = -frac_part;
+    char buf[16];// 用于存储浮点数字符串
+    int int_part = (int)num;// 获取整数部分
+    int frac_part = (int)((num - int_part) * 10.0f);// 获取小数部分，保留一位小数
+    if(frac_part < 0) frac_part = -frac_part;// 小数部分取绝对值
     
-    // 简单拼字符串
-    sprintf(buf, "%d.%d", int_part, frac_part);
-    OLED_ShowString(x, y, buf);
+    sprintf(buf, "%d.%d", int_part, frac_part);// 转成字符串
+    OLED_ShowString(x, y, buf);// 显示浮点数字符串
 }
