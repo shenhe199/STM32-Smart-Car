@@ -3,33 +3,33 @@
 
 #include "main.h"
 
-// ================= µç»ú¿ØÖÆº¯ÊıÉùÃ÷ =================
+// ================= ç”µæœºæ§åˆ¶å‡½æ•°å£°æ˜ =================
 
 /**
- * @brief  Í£³µ
+ * @brief  åœè½¦
  */
 void Car_Stop(void);
 
 /**
- * @brief  µç»ú»ù´¡Ç°½ø (¿ª»·)
- * @param  speed: PWM Õ¼¿Õ±È (0-999)
+ * @brief  ç”µæœºåŸºç¡€å‰è¿› (å¼€ç¯)
+ * @param  speed: PWM å ç©ºæ¯” (0-999)
  */
 void Car_Forward(uint16_t speed);
 
 /**
- * @brief  µç»úÔ­µØ×ó×ª (¿ª»·)
- * @param  speed: PWM Õ¼¿Õ±È (0-999)
+ * @brief  ç”µæœºåŸåœ°å·¦è½¬ (å¼€ç¯)
+ * @param  speed: PWM å ç©ºæ¯” (0-999)
  */
 void Car_TurnLeft(uint16_t speed);
 
 /**
- * @brief  ±àÂëÆ÷±Õ»·Ö±ĞĞ (´øÌİĞÎ¼Ó¼õËÙ)
- * @param  distance_cm: Ä¿±ê¾àÀë (µ¥Î»: ÀåÃ×)
+ * @brief  ç¼–ç å™¨é—­ç¯ç›´è¡Œ (å¸¦æ¢¯å½¢åŠ å‡é€Ÿ)
+ * @param  distance_cm: ç›®æ ‡è·ç¦» (å•ä½: å˜ç±³)
  */
 void Car_Forward_Distance(float distance_cm);
 
 /**
- * @brief  ÍÓÂİÒÇ±Õ»·×ó×ª (´øÆ½»¬¼õËÙ)
+ * @brief  é™€èºä»ªé—­ç¯å·¦è½¬ (å¸¦å¹³æ»‘å‡é€Ÿ)
  */
 void Turn_Left_90(void);
 

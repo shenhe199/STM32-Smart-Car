@@ -57,37 +57,37 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 
 //================== MPU6050 =====================
-#define GYRO_SENSITIVITY  16.4f       // ������ 
-#define GYRO_DEADBAND     0.5f        // ���������ˡ����ٶ�����(��/��)
-#define STRAIGHT_DEADBAND 1.0f        // ��ֱ�о�ƫ��ֱ��ƫ������(��)
-#define STRAIGHT_CORRECT  25          // ��ֱ�о�ƫ��ֱ�о�ƫ����/1000
-#define ALIGN_DEADBAND    0.7f        // ��������롿��������������ȣ�
-#define MIN_SPEED         60.0f       // ��������롿��С�ٶ�/1000 
-/* #define ANGLE_INTEGRAL_K  0.017f      // ʱ��ϵ�� */
+#define GYRO_SENSITIVITY  16.4f       // 灵敏度 
+#define GYRO_DEADBAND     0.5f        // 【死区过滤】角速度死区(度/秒)
+#define STRAIGHT_DEADBAND 1.0f        // 【直行纠偏】直行偏差死区(度)
+#define STRAIGHT_CORRECT  25          // 【直行纠偏】直行纠偏力度/1000
+#define ALIGN_DEADBAND    0.7f        // 【航向对齐】航向对齐死区（度）
+#define MIN_SPEED         60.0f       // 【航向对齐】最小速度/1000 
+/* #define ANGLE_INTEGRAL_K  0.017f      // 时间系数 */
 
-// ================= ������ =================
-#define ENCODER_PER_CM    70.0f       // ÿcm������ 
+// ================= 编码器 =================
+#define ENCODER_PER_CM    70.0f       // 每cm的脉冲 
 
 // ================= FORWARD =================
-#define STRAIGHT_DIST_CM  58.5f       // �趨����(cm)
-#define MOTOR_MAX_SPEED   200         // ����ٶ�/1000
-#define MOTOR_MIN_SPEED   100         // ��С�ٶ�/1000
-#define ACCEL_RATIO       0.25f       // ������ռ�ܾ���ı��� (%)
-#define DECEL_RATIO       0.25f       // ������ռ�ܾ���ı��� (%)
-/* #define MOTOR_K           1.09f        // ���ٲ�Ӳ������ϵ�� */ 
+#define STRAIGHT_DIST_CM  58.5f       // 设定距离(cm)
+#define MOTOR_MAX_SPEED   200         // 最大速度/1000
+#define MOTOR_MIN_SPEED   100         // 最小速度/1000
+#define ACCEL_RATIO       0.25f       // 加速区占总距离的比例 (%)
+#define DECEL_RATIO       0.25f       // 减速区占总距离的比例 (%)
+/* #define MOTOR_K           1.09f        // 轮速差硬件补偿系数 */ 
 
 // ================= TURNING =================
-#define TURN_TARGET_ANGLE 84.0f       // �趨�Ƕ� (90��)
-#define TURN_MAX_SPEED    120.0f      // ����ٶ�/1000
-#define TURN_MIN_SPEED    80.0f       // ��С�ٶ�/1000
-#define TURN_ACCEL_ANGLE  20.0f       // ������ռ�ܾ���ı��� (%)
-#define TURN_DECEL_ANGLE  45.0f       // ������ռ�ܾ���ı��� (%)
+#define TURN_TARGET_ANGLE 84.0f       // 设定角度 (90度)
+#define TURN_MAX_SPEED    120.0f      // 最大速度/1000
+#define TURN_MIN_SPEED    80.0f       // 最小速度/1000
+#define TURN_ACCEL_ANGLE  20.0f       // 加速区占总距离的比例 (%)
+#define TURN_DECEL_ANGLE  45.0f       // 减速区占总距离的比例 (%)
 
 //=======================================================
 
-extern float gz_offset;//���������Ư��У׼ֵ
-extern volatile float current_angle;//��ǰ�Ƕ� 
-extern volatile float real_gz;//��ʵ���ٶ� 
+extern float gz_offset;//陀螺仪零点漂移校准值
+extern volatile float current_angle;//当前角度 
+extern volatile float real_gz;//真实角速度 
 
 /* USER CODE END EFP */
 

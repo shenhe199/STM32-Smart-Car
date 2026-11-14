@@ -5,21 +5,21 @@
 #include "oled.h"
 #include <stdlib.h>
 
-// ================= Íâ²¿È«¾Ö±äÁ¿ÉùÃ÷ =================
-extern TIM_HandleTypeDef htim2;        // µç»ú PWM ¶¨Ê±Æ÷
-extern TIM_HandleTypeDef htim3;        // ×óÂÖ±àÂëÆ÷¶¨Ê±Æ÷
-extern TIM_HandleTypeDef htim4;        // ÓÒÂÖ±àÂëÆ÷¶¨Ê±Æ÷
-extern volatile float current_angle;   // µ±Ç°½Ç¶È
-extern float gz_offset;                // ½ÇËÙ¶ÈµÄÁãµãÆ«ÒÆÁ¿
+// ================= å¤–éƒ¨å…¨å±€å˜é‡å£°æ˜ =================
+extern TIM_HandleTypeDef htim2;        // ç”µæœº PWM å®šæ—¶å™¨
+extern TIM_HandleTypeDef htim3;        // å·¦è½®ç¼–ç å™¨å®šæ—¶å™¨
+extern TIM_HandleTypeDef htim4;        // å³è½®ç¼–ç å™¨å®šæ—¶å™¨
+extern volatile float current_angle;   // å½“å‰è§’åº¦
+extern float gz_offset;                // è§’é€Ÿåº¦çš„é›¶ç‚¹åç§»é‡
 // ====================================================
 
-//Í£³µº¯Êı
+//åœè½¦å‡½æ•°
 void Car_Stop(void) {
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, 0);
 }
 
-//Ç°½øº¯Êı
+//å‰è¿›å‡½æ•°
 void Car_Forward(uint16_t speed) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);   
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET); 
@@ -29,7 +29,7 @@ void Car_Forward(uint16_t speed) {
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, speed);
 }
 
-//×ó×ªÍäº¯Êı
+//å·¦è½¬å¼¯å‡½æ•°
 void Car_TurnLeft(uint16_t speed) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET);   
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET); 
@@ -39,7 +39,7 @@ void Car_TurnLeft(uint16_t speed) {
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, speed);
 }
 
-//ÓÒ×ªÍäº¯Êı
+//å³è½¬å¼¯å‡½æ•°
 void Car_TurnRight(uint16_t speed) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);   
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET); 
@@ -49,104 +49,104 @@ void Car_TurnRight(uint16_t speed) {
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, speed);
 }
 
-//Ç°½ø
+//å‰è¿›
 void Car_Forward_Distance(float distance_cm) {
 	
-		int16_t current_pulse = 0;//¶¨ÒåÆ½¾ùÂö³å
-    int target_pulse = (int)(distance_cm * ENCODER_PER_CM);//Ä¿±êÂö³åÊı
-    int accel_pulse = target_pulse * ACCEL_RATIO;//¼ÓËÙÂö³åÊı
-    int decel_pulse = target_pulse * DECEL_RATIO;//¼õËÙÂö³åÊı
+		int16_t current_pulse = 0;//å®šä¹‰å¹³å‡è„‰å†²
+    int target_pulse = (int)(distance_cm * ENCODER_PER_CM);//ç›®æ ‡è„‰å†²æ•°
+    int accel_pulse = target_pulse * ACCEL_RATIO;//åŠ é€Ÿè„‰å†²æ•°
+    int decel_pulse = target_pulse * DECEL_RATIO;//å‡é€Ÿè„‰å†²æ•°
 	
-    __HAL_TIM_SET_COUNTER(&htim3, 0);//×óÂÖÂö³åµ÷Áã
-		__HAL_TIM_SET_COUNTER(&htim4, 0);//ÓÒÂÖÂö³åµ÷Áã
+    __HAL_TIM_SET_COUNTER(&htim3, 0);//å·¦è½®è„‰å†²è°ƒé›¶
+		__HAL_TIM_SET_COUNTER(&htim4, 0);//å³è½®è„‰å†²è°ƒé›¶
 	
-		int refresh_count = 0;//OLEDÆÁÄ»Ë¢ĞÂÂÊ
-		uint32_t last_time = HAL_GetTick();//¶ÁÈ¡³õÊ¼Ê±¼ä´Á
-		float target_yaw = current_angle;//³õÊ¼·½Ïò
+		int refresh_count = 0;//OLEDå±å¹•åˆ·æ–°ç‡
+		uint32_t last_time = HAL_GetTick();//è¯»å–åˆå§‹æ—¶é—´æˆ³
+		float target_yaw = current_angle;//åˆå§‹æ–¹å‘
 	
-		float current_speed = TURN_MIN_SPEED;//¶¨Òåµ±Ç°ËÙ¶È
+		float current_speed = TURN_MIN_SPEED;//å®šä¹‰å½“å‰é€Ÿåº¦
 		Car_Forward(TURN_MIN_SPEED);
 	
     while(1) {
 			
-        int16_t left_pulse = __HAL_TIM_GET_COUNTER(&htim3);//¶ÁÈ¡×óÂÖÂö³å
-				int16_t right_pulse = __HAL_TIM_GET_COUNTER(&htim4);//¶ÁÈ¡ÓÒÂÖÂö³å
-        if (left_pulse < 0) left_pulse = -left_pulse; //¾ø¶ÔÖµ
-				if (right_pulse < 0) right_pulse = -right_pulse;//¾ø¶ÔÖµ
+        int16_t left_pulse = __HAL_TIM_GET_COUNTER(&htim3);//è¯»å–å·¦è½®è„‰å†²
+				int16_t right_pulse = __HAL_TIM_GET_COUNTER(&htim4);//è¯»å–å³è½®è„‰å†²
+        if (left_pulse < 0) left_pulse = -left_pulse; //ç»å¯¹å€¼
+				if (right_pulse < 0) right_pulse = -right_pulse;//ç»å¯¹å€¼
 			
-				//ÍË³öÑ­»·Ìõ¼ş
-				current_pulse = (left_pulse + right_pulse) / 2;//È¡Æ½¾ùÖµ
+				//é€€å‡ºå¾ªç¯æ¡ä»¶
+				current_pulse = (left_pulse + right_pulse) / 2;//å–å¹³å‡å€¼
         if (current_pulse >= target_pulse) {
             break;
         }
 				
-				//================MPU6050·ÀÅÜÆ«£¨¶ÁÈ¡£©==================
+				//================MPU6050é˜²è·‘åï¼ˆè¯»å–ï¼‰==================
 				
-				MPU6050_Read_All();//¶ÁÈ¡MPU6050Êı¾İ
-				float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//ÕæÊµ½ÇËÙ¶È
-				if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//ËÀÇø¹ıÂË
+				MPU6050_Read_All();//è¯»å–MPU6050æ•°æ®
+				float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//çœŸå®è§’é€Ÿåº¦
+				if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//æ­»åŒºè¿‡æ»¤
 	
-				uint32_t current_time = HAL_GetTick();//¶ÁÈ¡µ±Ç°Ê±¼ä´Á
-				float dt = (current_time - last_time) / 1000.0f;//ÕæÊµÊ±¼ä£¨s£©
-				last_time = current_time; // ¸üĞÂÊ±¼ä´Á
+				uint32_t current_time = HAL_GetTick();//è¯»å–å½“å‰æ—¶é—´æˆ³
+				float dt = (current_time - last_time) / 1000.0f;//çœŸå®æ—¶é—´ï¼ˆsï¼‰
+				last_time = current_time; // æ›´æ–°æ—¶é—´æˆ³
         
-				current_angle += real_gz * dt; //ÓÃÕæÊµÊ±¼ä½øĞĞ»ı·Ö
+				current_angle += real_gz * dt; //ç”¨çœŸå®æ—¶é—´è¿›è¡Œç§¯åˆ†
 				
-        // ===================ÌİĞÎ¼Ó¼õËÙ=========================
+        // ===================æ¢¯å½¢åŠ å‡é€Ÿ=========================
 				
         int remaining_pulse = target_pulse - current_pulse;
-        //¼ÓËÙ
+        //åŠ é€Ÿ
         if (current_pulse < accel_pulse) {
             current_speed = MOTOR_MIN_SPEED + (MOTOR_MAX_SPEED - MOTOR_MIN_SPEED) * current_pulse / accel_pulse;
         }
-				//ÔÈËÙ
+				//åŒ€é€Ÿ
         else if (remaining_pulse < decel_pulse) {
             current_speed = MOTOR_MIN_SPEED + (MOTOR_MAX_SPEED - MOTOR_MIN_SPEED) * remaining_pulse / decel_pulse;
         } 
-				//¼õËÙ
+				//å‡é€Ÿ
         else {
             current_speed = MOTOR_MAX_SPEED;
         }
         
 				/*
-        //£¨×óÂÖ¹¦ÂÊÆ«µÍ£©Ó²¼ş²¹³¥·ÀÅÜÆ«
+        //ï¼ˆå·¦è½®åŠŸç‡åä½ï¼‰ç¡¬ä»¶è¡¥å¿é˜²è·‘å
         uint16_t left_speed =(int)( current_speed * MOTOR_K); 
 				if(left_speed > 999) left_speed = 999;
     
-				//·Ö±ğÉèÖÃÕ¼¿Õ±È
+				//åˆ†åˆ«è®¾ç½®å ç©ºæ¯”
 				__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, left_speed);
 				__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, current_speed);
 				*/
 				
-				//================MPU6050·ÀÅÜÆ«£¨¾ÀÕı£©==================
+				//================MPU6050é˜²è·‘åï¼ˆçº æ­£ï¼‰==================
 				
-				float yaw_error = target_yaw - current_angle;//ËãÆ«½Ç
+				float yaw_error = target_yaw - current_angle;//ç®—åè§’
         int correction = 0;
 				
-				//ËÀÇø¿ØÖÆ
+				//æ­»åŒºæ§åˆ¶
 				if (yaw_error > STRAIGHT_DEADBAND) {
             correction = STRAIGHT_CORRECT;
         } else if (yaw_error < -STRAIGHT_DEADBAND) {
             correction = -STRAIGHT_CORRECT;
         }
 
-        // °Ñ»ù´¡ËÙ¶È¼ÓÉÏ¾ÀÆ«Á¿
+        // æŠŠåŸºç¡€é€Ÿåº¦åŠ ä¸Šçº åé‡
         int left_speed = current_speed - correction;
         int right_speed = current_speed + correction;
         
-        // ÏŞ·ù±£»¤
+        // é™å¹…ä¿æŠ¤
         if (left_speed > 990) left_speed = 990;
         if (left_speed < 100) left_speed = 100;
         if (right_speed > 990) right_speed = 990;
         if (right_speed < 100) right_speed = 100;
 
-        // ·Ö±ğÉèÖÃËÙ¶È£¨Õ¼¿Õ±È£©
+        // åˆ†åˆ«è®¾ç½®é€Ÿåº¦ï¼ˆå ç©ºæ¯”ï¼‰
         __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, left_speed); 
         __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, right_speed);
 				
         // ========================================================
 
-        // OLEDÏÔÊ¾
+        // OLEDæ˜¾ç¤º
         refresh_count++;
         if (refresh_count >= 10) {
             OLED_ShowString(0, 4, "PULSE:");
@@ -161,30 +161,30 @@ void Car_Forward_Distance(float distance_cm) {
         HAL_Delay(5);
     }
     
-    Car_Stop();//Í£³µÖ¸Áî
+    Car_Stop();//åœè½¦æŒ‡ä»¤
 		
-		//===============================º½Ïò¶ÔÆë========================================
+		//===============================èˆªå‘å¯¹é½========================================
 		
-		uint32_t stop_time = HAL_GetTick(); // ¼ÇÂ¼É²³µµÄÊ±¼ä´Á
+		uint32_t stop_time = HAL_GetTick(); // è®°å½•åˆ¹è½¦çš„æ—¶é—´æˆ³
 		
 		while(HAL_GetTick() - stop_time < 800) {
 			
-		//¡ª¡ª¡ª¡ª
-		MPU6050_Read_All();//¶ÁÈ¡MPU6050Êı¾İ
-    float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//ÕæÊµ½ÇËÙ¶È
-		if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//ËÀÇø¹ıÂË
-		uint32_t current_time = HAL_GetTick();//¶ÁÈ¡µ±Ç°Ê±¼ä´Á
-    float dt = (current_time - last_time) / 1000.0f;//ÕæÊµÊ±¼ä£¨s£©
-		last_time = current_time; // ¸üĞÂÊ±¼ä´Á
-		current_angle += real_gz * dt;//ÓÃÕæÊµÊ±¼ä½øĞĞ»ı·Ö
-		//¡ª¡ª¡ª¡ª
+		//â€”â€”â€”â€”
+		MPU6050_Read_All();//è¯»å–MPU6050æ•°æ®
+    float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//çœŸå®è§’é€Ÿåº¦
+		if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//æ­»åŒºè¿‡æ»¤
+		uint32_t current_time = HAL_GetTick();//è¯»å–å½“å‰æ—¶é—´æˆ³
+    float dt = (current_time - last_time) / 1000.0f;//çœŸå®æ—¶é—´ï¼ˆsï¼‰
+		last_time = current_time; // æ›´æ–°æ—¶é—´æˆ³
+		current_angle += real_gz * dt;//ç”¨çœŸå®æ—¶é—´è¿›è¡Œç§¯åˆ†
+		//â€”â€”â€”â€”
 			
-		float yaw_error = target_yaw - current_angle;//ËãÆ«½Ç	
+		float yaw_error = target_yaw - current_angle;//ç®—åè§’	
 			
-		//ËÀÇø¿ØÖÆ
-		if (yaw_error > ALIGN_DEADBAND) {//Æ«ÓÒ
+		//æ­»åŒºæ§åˆ¶
+		if (yaw_error > ALIGN_DEADBAND) {//åå³
            Car_TurnLeft(MIN_SPEED);
-        } else if (yaw_error < -ALIGN_DEADBAND) {//Æ«×ó
+        } else if (yaw_error < -ALIGN_DEADBAND) {//åå·¦
            Car_TurnRight(MIN_SPEED);
         }else{
 					 Car_Stop();
@@ -198,72 +198,72 @@ void Car_Forward_Distance(float distance_cm) {
 		
 		//===============================================================================
 		
-		int16_t left_pulse = __HAL_TIM_GET_COUNTER(&htim3);//¶ÁÈ¡×óÂÖÂö³å
-		int16_t right_pulse = __HAL_TIM_GET_COUNTER(&htim4);//¶ÁÈ¡ÓÒÂÖÂö³å   
-    if (left_pulse < 0) left_pulse = -left_pulse; //¾ø¶ÔÖµ
-		if (right_pulse < 0) right_pulse = -right_pulse;//¾ø¶ÔÖµ
-		current_pulse = (left_pulse + right_pulse) / 2;//È¡Æ½¾ùÖµ
+		int16_t left_pulse = __HAL_TIM_GET_COUNTER(&htim3);//è¯»å–å·¦è½®è„‰å†²
+		int16_t right_pulse = __HAL_TIM_GET_COUNTER(&htim4);//è¯»å–å³è½®è„‰å†²   
+    if (left_pulse < 0) left_pulse = -left_pulse; //ç»å¯¹å€¼
+		if (right_pulse < 0) right_pulse = -right_pulse;//ç»å¯¹å€¼
+		current_pulse = (left_pulse + right_pulse) / 2;//å–å¹³å‡å€¼
 		OLED_ShowString(0, 4, "PULSE:");
     OLED_ShowNum(42, 4, current_pulse, 5);
 		
 }
 
-//×ªÍä
+//è½¬å¼¯
 void Turn_Left_90(void) {
 	
-    float start_angle = current_angle; //¶¨Òå³õÊ¼½Ç¶È
-    float target_angle = start_angle + TURN_TARGET_ANGLE;//¶¨ÒåÄ¿±ê½Ç¶È
-		float current_speed = TURN_MIN_SPEED;//¶¨Òåµ±Ç°ËÙ¶È
+    float start_angle = current_angle; //å®šä¹‰åˆå§‹è§’åº¦
+    float target_angle = start_angle + TURN_TARGET_ANGLE;//å®šä¹‰ç›®æ ‡è§’åº¦
+		float current_speed = TURN_MIN_SPEED;//å®šä¹‰å½“å‰é€Ÿåº¦
     
-    int refresh_count = 0;//OLEDÆÁÄ»Ë¢ĞÂÂÊ
-		uint32_t last_time = HAL_GetTick();//¶ÁÈ¡³õÊ¼Ê±¼ä´Á
+    int refresh_count = 0;//OLEDå±å¹•åˆ·æ–°ç‡
+		uint32_t last_time = HAL_GetTick();//è¯»å–åˆå§‹æ—¶é—´æˆ³
 
     while (1) {
 			
-        MPU6050_Read_All();//¶ÁÈ¡MPU6050Êı¾İ
-        float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//ÕæÊµ½ÇËÙ¶È
-				if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//ËÀÇø¹ıÂË
+        MPU6050_Read_All();//è¯»å–MPU6050æ•°æ®
+        float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//çœŸå®è§’é€Ÿåº¦
+				if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//æ­»åŒºè¿‡æ»¤
 			
-        /*current_angle += real_gz * ANGLE_INTEGRAL_K; //Î¢Ôª·¨»ı·Ö£¨Ê±¼äÏµÊı£©*/
+        /*current_angle += real_gz * ANGLE_INTEGRAL_K; //å¾®å…ƒæ³•ç§¯åˆ†ï¼ˆæ—¶é—´ç³»æ•°ï¼‰*/
 			
-				//================½ø½×Î¢Ôª·¨»ı·Ö=================
-				uint32_t current_time = HAL_GetTick();//¶ÁÈ¡µ±Ç°Ê±¼ä´Á
-        float dt = (current_time - last_time) / 1000.0f;//ÕæÊµÊ±¼ä£¨s£©
-        last_time = current_time; // ¸üĞÂÊ±¼ä´Á
+				//================è¿›é˜¶å¾®å…ƒæ³•ç§¯åˆ†=================
+				uint32_t current_time = HAL_GetTick();//è¯»å–å½“å‰æ—¶é—´æˆ³
+        float dt = (current_time - last_time) / 1000.0f;//çœŸå®æ—¶é—´ï¼ˆsï¼‰
+        last_time = current_time; // æ›´æ–°æ—¶é—´æˆ³
         
-        current_angle += real_gz * dt; //ÓÃÕæÊµÊ±¼ä½øĞĞ»ı·Ö
+        current_angle += real_gz * dt; //ç”¨çœŸå®æ—¶é—´è¿›è¡Œç§¯åˆ†
 			
 			  //===============================================
 			
-				//ÍË³öÑ­»·Ìõ¼ş
+				//é€€å‡ºå¾ªç¯æ¡ä»¶
 				if(current_angle >= target_angle){
 					break;
 				}
         
-        // =================ÌİĞÎ¼Ó¼õËÙ====================
+        // =================æ¢¯å½¢åŠ å‡é€Ÿ====================
 			
-        float passed_angle = current_angle - start_angle;//ÒÑ×ß½Ç¶È
-        float remaining_angle = target_angle - current_angle;//Ê£Óà½Ç¶È
+        float passed_angle = current_angle - start_angle;//å·²èµ°è§’åº¦
+        float remaining_angle = target_angle - current_angle;//å‰©ä½™è§’åº¦
         
-				//¼ÓËÙ
+				//åŠ é€Ÿ
         if (passed_angle < TURN_ACCEL_ANGLE) {
             current_speed = TURN_MIN_SPEED + (TURN_MAX_SPEED - TURN_MIN_SPEED) * (passed_angle / TURN_ACCEL_ANGLE);
         } 
-				//¼õËÙ
+				//å‡é€Ÿ
         else if (remaining_angle < TURN_DECEL_ANGLE) {
             current_speed = TURN_MIN_SPEED + (TURN_MAX_SPEED - TURN_MIN_SPEED) * (remaining_angle / TURN_DECEL_ANGLE);
         } 
-				//ÔÈËÙ
+				//åŒ€é€Ÿ
         else {
             current_speed = TURN_MAX_SPEED;
         }
         
-        //ÉèÖÃËÙ¶È
+        //è®¾ç½®é€Ÿåº¦
         Car_TurnLeft((uint16_t)current_speed);
 				
         // =================================================
         
-        // OLEDÏÔÊ¾
+        // OLEDæ˜¾ç¤º
         refresh_count++;
         if (refresh_count >= 10) {
 						OLED_ShowString(0, 5, "SPD:");
@@ -276,28 +276,28 @@ void Turn_Left_90(void) {
         HAL_Delay(5); 
     }
 		
-    Car_Stop();//Í£³µÖ¸Áî 
+    Car_Stop();//åœè½¦æŒ‡ä»¤ 
 		
-		//===============================º½Ïò¶ÔÆë========================================
-		uint32_t stop_time = HAL_GetTick(); // ¼ÇÂ¼É²³µµÄÊ±¼ä´Á
+		//===============================èˆªå‘å¯¹é½========================================
+		uint32_t stop_time = HAL_GetTick(); // è®°å½•åˆ¹è½¦çš„æ—¶é—´æˆ³
 		
 		while(HAL_GetTick() - stop_time < 800) {
 
-		//¡ª¡ª¡ª¡ª
-		MPU6050_Read_All();//¶ÁÈ¡MPU6050Êı¾İ
-    float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//ÕæÊµ½ÇËÙ¶È
-		if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//ËÀÇø¹ıÂË
-		uint32_t current_time = HAL_GetTick();//¶ÁÈ¡µ±Ç°Ê±¼ä´Á
-    float dt = (current_time - last_time) / 1000.0f;//ÕæÊµÊ±¼ä£¨s£©
-		last_time = current_time; // ¸üĞÂÊ±¼ä´Á
-		current_angle += real_gz * dt;//ÓÃÕæÊµÊ±¼ä½øĞĞ»ı·Ö
-		//¡ª¡ª¡ª¡ª
+		//â€”â€”â€”â€”
+		MPU6050_Read_All();//è¯»å–MPU6050æ•°æ®
+    float real_gz = (gz - gz_offset) / GYRO_SENSITIVITY;//çœŸå®è§’é€Ÿåº¦
+		if (real_gz > -GYRO_DEADBAND && real_gz < GYRO_DEADBAND) real_gz = 0.0f;//æ­»åŒºè¿‡æ»¤
+		uint32_t current_time = HAL_GetTick();//è¯»å–å½“å‰æ—¶é—´æˆ³
+    float dt = (current_time - last_time) / 1000.0f;//çœŸå®æ—¶é—´ï¼ˆsï¼‰
+		last_time = current_time; // æ›´æ–°æ—¶é—´æˆ³
+		current_angle += real_gz * dt;//ç”¨çœŸå®æ—¶é—´è¿›è¡Œç§¯åˆ†
+		//â€”â€”â€”â€”
 			
-		float yaw_error = start_angle + 90.0f - current_angle;//ËãÆ«½Ç	
-		//ËÀÇø¿ØÖÆ
-		if (yaw_error > ALIGN_DEADBAND) {//Æ«ÓÒ
+		float yaw_error = start_angle + 90.0f - current_angle;//ç®—åè§’	
+		//æ­»åŒºæ§åˆ¶
+		if (yaw_error > ALIGN_DEADBAND) {//åå³
            Car_TurnLeft(MIN_SPEED);
-        } else if (yaw_error < -ALIGN_DEADBAND) {//Æ«×ó
+        } else if (yaw_error < -ALIGN_DEADBAND) {//åå·¦
            Car_TurnRight(MIN_SPEED);
         }else{
 					 Car_Stop();
