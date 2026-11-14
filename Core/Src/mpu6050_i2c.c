@@ -17,16 +17,8 @@ static inline void IIC_Delay(void)
 //初始化
 void IIC_Init(void)
 {
-    //引脚配置【重复嫌疑】
-    GPIO_InitTypeDef g = {0};
-    __HAL_RCC_GPIOB_CLK_ENABLE();//使能 GPIOB 时钟
-    g.Pin   = IIC_SCL_PIN | IIC_SDA_PIN;//SCL/SDA 引脚
-    g.Mode  = GPIO_MODE_OUTPUT_OD;//开漏输出
-    g.Pull  = GPIO_PULLUP;//上拉
-    g.Speed = GPIO_SPEED_FREQ_HIGH;//高速
-    HAL_GPIO_Init(IIC_SCL_GPIO_PORT, &g);//初始化 SCL/SDA 引脚
-
-    SCL_H(); SDA_H();//拉高总线，空闲状态
+    SCL_H();
+    SDA_H();
 }
 
 /* SDA 被卡死时调用：发 9 个时钟把从机状态机拉出来 */
