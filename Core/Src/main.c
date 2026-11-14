@@ -70,9 +70,9 @@ static void MX_TIM4_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-float gz_offset = 0.0f;               // ½ÇËÙ¶ÈµÄÁãµãÆ«ÒÆÁ¿
-volatile float current_angle = 0.0f;  // µ±Ç°½Ç¶È
-volatile float real_gz = 0.0f;        // ½ÇËÙ¶È
+float gz_offset = 0.0f;               // è§’é€Ÿåº¦çš„é›¶ç‚¹åç§»é‡
+volatile float current_angle = 0.0f;  // å½“å‰è§’åº¦
+volatile float real_gz = 0.0f;        // è§’é€Ÿåº¦
 
 /* USER CODE END 0 */
 
@@ -111,29 +111,29 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 	
-	// ¿ªÆôPWM£¨¿ØÖÆÕ¼¿Õ±È£©
+	// å¼€å¯PWMï¼ˆæ§åˆ¶å ç©ºæ¯”ï¼‰
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 	
-	// ¿ªÆôTIM£¨¶¨Ê±Æ÷£©
+	// å¼€å¯TIMï¼ˆå®šæ—¶å™¨ï¼‰
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 	
-	//¿ªÆôI2C
+	//å¼€å¯I2C
   IIC_Init();
   HAL_Delay(100);
 	
-	//¿ªÆôOLED
+	//å¼€å¯OLED
   OLED_Init();
   OLED_Clear();
   OLED_ShowString(0, 0, "SYSTEM INIT...");
 	
-	//°´¼üÆô¶¯
+	//æŒ‰é”®å¯åŠ¨
 	OLED_ShowString(0, 2, "READY?");
   while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5) == GPIO_PIN_SET);
   HAL_Delay(100);
 
-  // ¿ªÆôMPU6050²¢Ğ£×¼
+  // å¼€å¯MPU6050å¹¶æ ¡å‡†
   uint8_t status = MPU6050_Init();
   
   if(status == 0) {
@@ -165,24 +165,24 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		
-	int16_t left_pulse = __HAL_TIM_GET_COUNTER(&htim3);//¶ÁÈ¡×óÂö³å
-  int16_t right_pulse = __HAL_TIM_GET_COUNTER(&htim4);//¶ÁÈ¡ÓÒÂö³å
+	int16_t left_pulse = __HAL_TIM_GET_COUNTER(&htim3);//è¯»å–å·¦è„‰å†²
+  int16_t right_pulse = __HAL_TIM_GET_COUNTER(&htim4);//è¯»å–å³è„‰å†²
 	
 	for(int j = 0; j < 4; j++) {
 		
-		//ÏÔÊ¾È¦Êı
+		//æ˜¾ç¤ºåœˆæ•°
 		OLED_Clear();
 		OLED_ShowString(0, 0, "NO.");
 		OLED_ShowNum(20, 0, j+1, 1);
 		
 	for(int i = 0; i < 4; i++) {
       
-			//Ö±ĞĞ
+			//ç›´è¡Œ
 			OLED_ShowString(0, 2, "FORWARD...");
       OLED_ShowNum(80, 2, i+1, 1);
       Car_Forward_Distance(STRAIGHT_DIST_CM);  
     
-      //×ªÍä
+      //è½¬å¼¯
       OLED_ShowString(0, 2, "TURNING..."); 
       Turn_Left_90();
 		
@@ -190,7 +190,7 @@ int main(void)
 	
 	}
   
-  //Íê³É
+  //å®Œæˆ
   OLED_Clear();
   OLED_ShowString(0, 0, "FINISH!");
 	while(1);

@@ -170,11 +170,32 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len) {
 
 // 显示浮点数函数
 void OLED_ShowFloat(uint8_t x, uint8_t y, float num) {
+    /*
+    //sprintf 方法（不推荐使用，可能会增加代码体积）
     char buf[16];// 用于存储浮点数字符串
     int int_part = (int)num;// 获取整数部分
     int frac_part = (int)((num - int_part) * 10.0f);// 获取小数部分，保留一位小数
     if(frac_part < 0) frac_part = -frac_part;// 小数部分取绝对值
-    
     sprintf(buf, "%d.%d", int_part, frac_part);// 转成字符串
     OLED_ShowString(x, y, buf);// 显示浮点数字符串
+    */
+
+   if (num < 0) {
+        OLED_ShowChar(x, y, '-'); // 显示负号
+        num = -num;// 取绝对值
+        x += 6;// 移动光标位置
+    }
+
+    int int_part = (int)num;// 获取整数部分
+    int frac_part = (int)((num - int_part) * 10.0f + 0.5f);// 获取小数部分，保留一位小数并四舍五入
+    if (frac_part >= 10) {int_part++;frac_part = 0;} // 处理进位情况
+
+    /* 计算整数部分的位数 */
+    uint8_t int_len = 1;
+    int temp = int_part;
+    while (temp >= 10) {int_len++;temp /= 10;}
+
+    OLED_ShowNum(x, y, int_part, int_len); // 显示整数部分
+    OLED_ShowChar(x + int_len * 6, y, '.');// 显示小数点
+    OLED_ShowNum(x + (int_len + 1) * 6, y, frac_part, 1);// 显示小数部分
 }
