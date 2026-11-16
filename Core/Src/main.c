@@ -164,9 +164,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		
-	int16_t left_pulse = __HAL_TIM_GET_COUNTER(&htim3);//读取左脉冲
-  int16_t right_pulse = __HAL_TIM_GET_COUNTER(&htim4);//读取右脉冲
 	
 	for(int j = 0; j < 4; j++) {
 		
@@ -181,11 +178,11 @@ int main(void)
 			OLED_ShowString(0, 2, "FORWARD...");
       OLED_ShowNum(80, 2, i+1, 1);
       Car_Forward_Distance(STRAIGHT_DIST_CM);  
-    
+    //HAL_Delay(5000);//【调试】
       //转弯
       OLED_ShowString(0, 2, "TURNING..."); 
       Turn_Left_90();
-		
+		//HAL_Delay(5000);//【调试】
   }
 	
 	}

@@ -59,9 +59,10 @@ void Error_Handler(void);
 //================== MPU6050 =====================
 #define GYRO_SENSITIVITY  16.4f       // 灵敏度 
 #define GYRO_DEADBAND     0.5f        // 【死区过滤】角速度死区(度/秒)
-#define STRAIGHT_DEADBAND 1.0f        // 【直行纠偏】直行偏差死区(度)
-#define STRAIGHT_CORRECT  25          // 【直行纠偏】直行纠偏力度/1000
-#define ALIGN_DEADBAND    0.7f        // 【航向对齐】航向对齐死区（度）
+#define STRAIGHT_DEADBAND 0.5f        // 【直行纠偏】直行偏差死区(度)
+#define STRAIGHT_CORRECT  10          // 【直行纠偏】直行纠偏力度kp
+#define MAX_CORRECTION    50          // 【直行纠偏】直行纠偏最大值
+#define ALIGN_DEADBAND    0.5f        // 【航向对齐】航向对齐死区（度）
 #define MIN_SPEED         60.0f       // 【航向对齐】最小速度/1000 
 /* #define ANGLE_INTEGRAL_K  0.017f      // 时间系数 */
 
@@ -74,7 +75,7 @@ void Error_Handler(void);
 #define MOTOR_MIN_SPEED   100         // 最小速度/1000
 #define ACCEL_RATIO       0.25f       // 加速区占总距离的比例 (%)
 #define DECEL_RATIO       0.25f       // 减速区占总距离的比例 (%)
-/* #define MOTOR_K           1.09f        // 轮速差硬件补偿系数 */ 
+/* #define MOTOR_K           1.09f        // 轮速差硬件补偿系数 */
 
 // ================= TURNING =================
 #define TURN_TARGET_ANGLE 84.0f       // 设定角度 (90度)

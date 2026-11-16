@@ -62,7 +62,7 @@ void Car_Forward_Distance(float distance_cm) {
 	
 		int refresh_count = 0;//OLED屏幕刷新率
 		uint32_t last_time = HAL_GetTick();//读取初始时间戳
-		float target_yaw = current_angle;//初始方向
+		float target_yaw = 0;//初始方向
 	
 		float current_speed = TURN_MIN_SPEED;//定义当前速度
 		Car_Forward(TURN_MIN_SPEED);
@@ -76,9 +76,7 @@ void Car_Forward_Distance(float distance_cm) {
 			
 				//退出循环条件
 				current_pulse = (left_pulse + right_pulse) / 2;//取平均值
-        if (current_pulse >= target_pulse) {
-            break;
-        }
+        if (current_pulse >= target_pulse) break;
 				
 				//================MPU6050防跑偏（读取）==================
 				
@@ -124,11 +122,15 @@ void Car_Forward_Distance(float distance_cm) {
         int correction = 0;
 				
 				//死区控制
-				if (yaw_error > STRAIGHT_DEADBAND) {
-            correction = STRAIGHT_CORRECT;
-        } else if (yaw_error < -STRAIGHT_DEADBAND) {
-            correction = -STRAIGHT_CORRECT;
+				if (yaw_error > STRAIGHT_DEADBAND) {//偏右
+            correction = (int) (STRAIGHT_CORRECT*yaw_error);
+        } else if (yaw_error < -STRAIGHT_DEADBAND) {//偏左
+            correction = (int) (STRAIGHT_CORRECT*yaw_error);
         }
+        
+        // 限幅保护
+        if (correction > MAX_CORRECTION) correction = MAX_CORRECTION;
+        if (correction < -MAX_CORRECTION) correction = -MAX_CORRECTION;
 
         // 把基础速度加上纠偏量
         int left_speed = current_speed - correction;
@@ -212,7 +214,7 @@ void Car_Forward_Distance(float distance_cm) {
 void Turn_Left_90(void) {
 	
     float start_angle = current_angle; //定义初始角度
-    float target_angle = start_angle + TURN_TARGET_ANGLE;//定义目标角度
+    float target_angle = TURN_TARGET_ANGLE;//定义目标角度
 		float current_speed = TURN_MIN_SPEED;//定义当前速度
     
     int refresh_count = 0;//OLED屏幕刷新率
@@ -293,7 +295,7 @@ void Turn_Left_90(void) {
 		current_angle += real_gz * dt;//用真实时间进行积分
 		//————
 			
-		float yaw_error = start_angle + 90.0f - current_angle;//算偏角	
+		float yaw_error = 90.0f - current_angle;//算偏角	
 		//死区控制
 		if (yaw_error > ALIGN_DEADBAND) {//偏右
            Car_TurnLeft(MIN_SPEED);
@@ -309,4 +311,5 @@ void Turn_Left_90(void) {
 		OLED_ShowString(0, 6, "ANG:");
     OLED_ShowFloat(30, 6, current_angle);
 		
+    current_angle = 0.0f; //重置角度为0
 }
