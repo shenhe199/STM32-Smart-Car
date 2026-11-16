@@ -1,9 +1,33 @@
+# ===== Keil MDK 工程 =====
 MDK-ARM/Objects/
 MDK-ARM/Listings/
 MDK-ARM/DebugConfig/
 MDK-ARM/*.uvguix.*
 MDK-ARM/*.uvoptx
 MDK-ARM/*.bak
+MDK-ARM/*.build_log.htm
+MDK-ARM/*.dep
+MDK-ARM/*.lnp
+MDK-ARM/*.map
+
+# ===== 编译生成文件 =====
 *.hex
+*.bin
 *.axf
-*.map
+*.elf
+*.o
+*.d
+*.crf
+*.sct
+
+# ===== STM32CubeMX 临时文件 =====
+*.ioc.bak
+
+# ===== VS Code 本地配置 =====
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# ===== 操作系统文件 =====
+.DS_Store
+Thumbs.db
